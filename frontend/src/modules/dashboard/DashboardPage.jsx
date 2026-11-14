@@ -1,0 +1,292 @@
+import { useMemo } from 'react';
+import {
+  CalendarRange,
+  Droplets,
+  Map as MapIcon,
+  RefreshCw,
+  ShoppingBag,
+  Sprout,
+  TrendingUp,
+  Users,
+  Wallet,
+  Wheat,
+} from 'lucide-react';
+import PageHeader from '../../components/common/PageHeader';
+import StatCard from '../../components/common/StatCard';
+import ErrorAlert from '../../components/common/ErrorAlert';
+import Loading from '../../components/common/Loading';
+import Badge from '../../components/common/Badge';
+import DataTable from '../../components/tables/DataTable';
+import BarChartCard from '../../components/charts/BarChartCard';
+import PieChartCard from '../../components/charts/PieChartCard';
+import { CHART_COLORS } from '../../components/charts/chartTheme';
+import dashboard from '../../services/dashboard';
+import useFetch from '../../hooks/useFetch';
+import { getApiMessage } from '../../utils/errors';
+import {
+  formatHectares,
+  formatInteger,
+  formatKg,
+  formatM3,
+  formatNumber,
+  formatRendimiento,
+  formatSoles,
+} from '../../utils/format';
+
+function buildComparativo(ventas, gastosPorCampana) {
+  const map = new Map();
+
+  for (const venta of ventas) {
+    map.set(venta.idCampana, {
+      idCampana: venta.idCampana,
+      nombreCampana: venta.nombreCampana || `#${venta.idCampana}`,
+      ventas: Number(venta.montoSoles) || 0,
+      gastos: 0,
+    });
+  }
+
+  for (const gasto of gastosPorCampana) {
+    const entry = map.get(gasto.idCampana) || {
+      idCampana: gasto.idCampana,
+      nombreCampana: gasto.nombreCampana || `#${gasto.idCampana}`,
+      ventas: 0,
+      gastos: 0,
+    };
+    entry.gastos = Number(gasto.montoSoles) || 0;
+    map.set(gasto.idCampana, entry);
+  }
+
+  return Array.from(map.values());
+}
+
+function rentabilidadBadge(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number === 0) {
+    return <Badge variant="default">{formatSoles(value)}</Badge>;
+  }
+  return (
+    <Badge variant={number > 0 ? 'success' : 'danger'}>{formatSoles(value)}</Badge>
+  );
+}
+
+const rentabilidadColumns = [
+  { key: 'nombreCampana', header: 'Campaña' },
+  {
+    key: 'produccionKg',
+    header: 'Producción',
+    align: 'right',
+    render: (row) => formatKg(row.produccionKg),
+  },
+  {
+    key: 'ventasSoles',
+    header: 'Ventas',
+    align: 'right',
+    render: (row) => formatSoles(row.ventasSoles),
+  },
+  {
+    key: 'gastosSoles',
+    header: 'Gastos',
+    align: 'right',
+    render: (row) => formatSoles(row.gastosSoles),
+  },
+  {
+    key: 'rentabilidadSoles',
+    header: 'Rentabilidad',
+    align: 'right',
+    render: (row) => rentabilidadBadge(row.rentabilidadSoles),
+  },
+  {
+    key: 'rendimientoKgHa',
+    header: 'Rendimiento',
+    align: 'right',
+    render: (row) => formatRendimiento(row.rendimientoKgHa),
+  },
+  {
+    key: 'consumoAguaM3',
+    header: 'Agua',
+    align: 'right',
+    render: (row) => formatM3(row.consumoAguaM3),
+  },
+];
+
+export default function DashboardPage() {
+  const resumen = useFetch(dashboard.resumen);
+  const produccion = useFetch(dashboard.produccion);
+  const ventas = useFetch(dashboard.ventas);
+  const gastos = useFetch(dashboard.gastos);
+  const rentabilidad = useFetch(dashboard.rentabilidad);
+
+  const refreshAll = () => {
+    resumen.reload();
+    produccion.reload();
+    ventas.reload();
+    gastos.reload();
+    rentabilidad.reload();
+  };
+
+  const stats = useMemo(() => {
+    const data = resumen.data || {};
+    const rentabilidadSoles = data.rentabilidadTotalSoles;
+    const rentabilidadTone =
+      rentabilidadSoles == null
+        ? 'default'
+        : Number(rentabilidadSoles) > 0
+          ? 'positive'
+          : Number(rentabilidadSoles) < 0
+            ? 'negative'
+            : 'default';
+
+    return [
+      { label: 'Agricultores', value: formatInteger(data.agricultores), icon: Users },
+      { label: 'Parcelas', value: formatInteger(data.parcelas), icon: MapIcon },
+      { label: 'Cultivos', value: formatInteger(data.cultivos), icon: Sprout },
+      {
+        label: 'Campañas',
+        value: formatInteger(data.campanas),
+        icon: CalendarRange,
+        hint: `${formatInteger(data.campanasActivas)} activas`,
+      },
+      { label: 'Área total', value: formatHectares(data.areaTotalHectareas) },
+      {
+        label: 'Producción total',
+        value: formatKg(data.produccionTotalKg),
+        icon: Wheat,
+      },
+      { label: 'Ventas', value: formatSoles(data.ventasTotalSoles), icon: ShoppingBag },
+      { label: 'Gastos', value: formatSoles(data.gastosTotalSoles), icon: Wallet },
+      {
+        label: 'Rentabilidad',
+        value: formatSoles(rentabilidadSoles),
+        icon: TrendingUp,
+        tone: rentabilidadTone,
+      },
+      { label: 'Agua consumida', value: formatM3(data.aguaTotalM3), icon: Droplets },
+    ];
+  }, [resumen.data]);
+
+  const comparativo = useMemo(() => {
+    const ventasRows = Array.isArray(ventas.data) ? ventas.data : [];
+    const gastosRows = Array.isArray(gastos.data?.porCampana)
+      ? gastos.data.porCampana
+      : [];
+    return buildComparativo(ventasRows, gastosRows);
+  }, [ventas.data, gastos.data]);
+
+  const produccionRows = Array.isArray(produccion.data) ? produccion.data : [];
+  const gastosPorConcepto = Array.isArray(gastos.data?.porConcepto)
+    ? gastos.data.porConcepto
+    : [];
+  const rentabilidadRows = Array.isArray(rentabilidad.data) ? rentabilidad.data : [];
+
+  return (
+    <div className="space-y-4">
+      <PageHeader
+        title="Dashboard"
+        description="Indicadores generales de la actividad agrícola de Cañete: producción, ventas, gastos y rentabilidad por campaña."
+        actions={
+          <button
+            type="button"
+            onClick={refreshAll}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3.5 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+          >
+            <RefreshCw size={15} aria-hidden="true" />
+            Actualizar
+          </button>
+        }
+      />
+
+      <section aria-label="Indicadores generales">
+        {resumen.loading ? (
+          <div className="rounded-xl border border-stone-200 bg-white">
+            <Loading label="Cargando indicadores…" />
+          </div>
+        ) : resumen.error ? (
+          <ErrorAlert
+            title="No se pudieron cargar los indicadores"
+            message={getApiMessage(resumen.error)}
+            onRetry={resumen.reload}
+          />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {stats.map((stat) => (
+              <StatCard
+                key={stat.label}
+                label={stat.label}
+                value={stat.value}
+                hint={stat.hint}
+                icon={stat.icon}
+                tone={stat.tone}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <BarChartCard
+          className="xl:col-span-2"
+          title="Producción por campaña"
+          description="Kilogramos cosechados en cada campaña."
+          data={produccionRows}
+          xKey="nombreCampana"
+          series={[{ dataKey: 'produccionKg', name: 'Producción (kg)', fill: CHART_COLORS.emerald }]}
+          legend={[{ name: 'Producción (kg)', color: CHART_COLORS.emerald }]}
+          valueFormatter={(value) => formatNumber(value)}
+          loading={produccion.loading}
+          error={produccion.error}
+          onRetry={produccion.reload}
+          emptyTitle="Sin producción registrada"
+          emptyDescription="Registre cosechas para ver la producción por campaña."
+        />
+        <PieChartCard
+          title="Gastos por concepto"
+          description="Distribución del gasto total."
+          data={gastosPorConcepto}
+          nameKey="concepto"
+          valueKey="montoSoles"
+          valueFormatter={(value) => formatSoles(value)}
+          loading={gastos.loading}
+          error={gastos.error}
+          onRetry={gastos.reload}
+          emptyTitle="Sin gastos registrados"
+          emptyDescription="Cuando registre gastos, aquí verá en qué se invierte."
+        />
+      </div>
+
+      <BarChartCard
+        title="Ventas vs. gastos por campaña"
+        description="Comparativo en soles de lo ingresado y lo invertido."
+        data={comparativo}
+        xKey="nombreCampana"
+        series={[
+          { dataKey: 'ventas', name: 'Ventas (S/)', fill: CHART_COLORS.emerald },
+          { dataKey: 'gastos', name: 'Gastos (S/)', fill: CHART_COLORS.amber },
+        ]}
+        legend={[
+          { name: 'Ventas (S/)', color: CHART_COLORS.emerald },
+          { name: 'Gastos (S/)', color: CHART_COLORS.amber },
+        ]}
+        valueFormatter={(value) => formatNumber(value)}
+        height={280}
+        loading={ventas.loading || gastos.loading}
+        error={ventas.error || gastos.error}
+        onRetry={() => {
+          ventas.reload();
+          gastos.reload();
+        }}
+        emptyTitle="Sin datos comparables"
+        emptyDescription="Registre ventas y gastos para compararlos por campaña."
+      />
+
+      <DataTable
+        columns={rentabilidadColumns}
+        rows={rentabilidadRows}
+        loading={rentabilidad.loading}
+        error={rentabilidad.error}
+        onRetry={rentabilidad.reload}
+        emptyTitle="Sin rentabilidad por campaña"
+        emptyDescription="Cuando registre cosechas, ventas y gastos, aquí verá la rentabilidad de cada campaña."
+      />
+    </div>
+  );
+}

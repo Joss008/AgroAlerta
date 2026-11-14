@@ -1,0 +1,1 @@
+-- Índices de claves foráneas y consultas frecuentes.
