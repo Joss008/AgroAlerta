@@ -22,6 +22,14 @@ export default function Modal({
 }) {
   const dialogRef = useRef(null);
   const previousFocusRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  const busyRef = useRef(busy);
+  const wasBusyRef = useRef(busy);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    busyRef.current = busy;
+  });
 
   useEffect(() => {
     if (!open) return undefined;
@@ -37,9 +45,9 @@ export default function Modal({
     focusTarget?.focus?.();
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape' && !busy && onClose) {
+      if (event.key === 'Escape' && !busyRef.current && onCloseRef.current) {
         event.stopPropagation();
-        onClose();
+        onCloseRef.current();
       }
       if (event.key === 'Tab' && dialogRef.current) {
         const focusable = dialogRef.current.querySelectorAll(
@@ -65,7 +73,16 @@ export default function Modal({
       document.body.style.overflow = overflow;
       previousFocusRef.current?.focus?.();
     };
-  }, [open, busy, onClose]);
+  }, [open]);
+
+  useEffect(() => {
+    const wasBusy = wasBusyRef.current;
+    wasBusyRef.current = busy;
+    if (!open || busy || !wasBusy) return;
+    dialogRef.current
+      ?.querySelector('input:not([type="hidden"]), select, textarea')
+      ?.focus?.();
+  }, [open, busy]);
 
   if (!open) return null;
 
