@@ -22,6 +22,7 @@ import Badge from '../../components/common/Badge';
 import DataTable from '../../components/tables/DataTable';
 import AreaChartCard from '../../components/charts/AreaChartCard';
 import BarChartCard from '../../components/charts/BarChartCard';
+import LineChartCard from '../../components/charts/LineChartCard';
 import PieChartCard from '../../components/charts/PieChartCard';
 import { CHART_COLORS } from '../../components/charts/chartTheme';
 import { BentoCard, BentoGrid } from '../../components/motion/BentoGrid';
@@ -362,7 +363,7 @@ export default function DashboardPage() {
         stagger={0.08}
         threshold={0.08}
       >
-        <BarChartCard
+        <LineChartCard
           title="Rendimiento estadístico por campaña"
           description="Productividad promedio expresada en kilogramos por hectárea."
           data={produccionRows}
@@ -371,7 +372,7 @@ export default function DashboardPage() {
             {
               dataKey: 'rendimientoKgHa',
               name: 'Rendimiento (kg/ha)',
-              fill: CHART_COLORS.teal,
+              color: CHART_COLORS.teal,
             },
           ]}
           legend={[{ name: 'Rendimiento (kg/ha)', color: CHART_COLORS.teal }]}

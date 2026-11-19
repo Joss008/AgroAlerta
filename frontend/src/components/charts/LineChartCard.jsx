@@ -2,7 +2,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -17,11 +16,12 @@ import {
   truncateLabel,
 } from './chartTheme';
 
-function ChartTooltip({ active, payload, label, valueFormatter }) {
+function ChartTooltip({ active, payload, label, valueFormatter, labelFormatter }) {
   if (!active || !payload?.length) return null;
+  const formattedLabel = labelFormatter ? labelFormatter(label) : label;
   return (
     <div className="rounded-lg border border-stone-200 bg-white px-3 py-2 shadow-lg">
-      <p className="text-xs font-semibold text-stone-800">{label}</p>
+      <p className="text-xs font-semibold text-stone-800">{formattedLabel}</p>
       <div className="mt-1 space-y-1">
         {payload.map((entry, index) => (
           <p
@@ -30,7 +30,7 @@ function ChartTooltip({ active, payload, label, valueFormatter }) {
           >
             <span
               className="h-2 w-2 shrink-0 rounded-full"
-              style={{ backgroundColor: entry.color || entry.stroke }}
+              style={{ backgroundColor: entry.color || CHART_COLORS.teal }}
               aria-hidden="true"
             />
             <span>{entry.name}</span>
@@ -51,10 +51,9 @@ export default function LineChartCard({
   data = [],
   xKey,
   series = [],
-  height = 300,
+  height = 280,
   valueFormatter,
   xTickFormatter,
-  referenceLines = [],
   loading = false,
   error = null,
   onRetry,
@@ -64,7 +63,7 @@ export default function LineChartCard({
 }) {
   const resolvedSeries = series.length
     ? series
-    : [{ dataKey: 'value', name: 'Valor', stroke: CHART_COLORS.emerald }];
+    : [{ dataKey: 'value', name: 'Valor', color: CHART_COLORS.teal }];
 
   const empty = !loading && !error && data.length === 0;
 
@@ -81,52 +80,54 @@ export default function LineChartCard({
       emptyDescription={emptyDescription}
       className={className}
     >
-      <div style={{ height }} className="w-full">
+      <div style={{ height }} className="w-full px-3 pt-2">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke={GRID_STROKE} strokeDasharray="3 3" />
+          <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
+            <CartesianGrid stroke={GRID_STROKE} strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey={xKey}
               tick={AXIS_TICK_STYLE}
-              tickLine={false}
               axisLine={{ stroke: AXIS_LINE_STROKE }}
+              tickLine={false}
               tickFormatter={(value) =>
                 xTickFormatter ? xTickFormatter(value) : truncateLabel(value)
               }
-              interval={0}
-              height={44}
             />
             <YAxis
               tick={AXIS_TICK_STYLE}
-              tickLine={false}
               axisLine={false}
-              width={72}
-              tickFormatter={(value) =>
-                valueFormatter ? valueFormatter(value) : String(value)
-              }
+              tickLine={false}
+              width={64}
+              tickFormatter={valueFormatter}
             />
             <Tooltip
-              cursor={{ stroke: '#d6d3d1', strokeDasharray: '3 3' }}
-              content={<ChartTooltip valueFormatter={valueFormatter} />}
+              content={
+                <ChartTooltip
+                  valueFormatter={valueFormatter}
+                  labelFormatter={xTickFormatter}
+                />
+              }
             />
-            {referenceLines.map((line) => (
-              <ReferenceLine
-                key={`ref-${line.y}`}
-                y={line.y}
-                stroke={line.stroke || '#a8a29e'}
-                strokeDasharray={line.strokeDasharray || '4 4'}
-              />
-            ))}
             {resolvedSeries.map((item) => (
               <Line
                 key={item.dataKey}
-                type="linear"
+                type="monotone"
                 dataKey={item.dataKey}
                 name={item.name}
-                stroke={item.stroke}
-                strokeWidth={2.5}
-                dot={{ r: 3.5, strokeWidth: 0, fill: item.stroke }}
-                activeDot={{ r: 5, strokeWidth: 0 }}
+                stroke={item.color || CHART_COLORS.teal}
+                strokeWidth={2.2}
+                dot={{
+                  r: 4,
+                  fill: item.color || CHART_COLORS.teal,
+                  stroke: '#ffffff',
+                  strokeWidth: 1.5,
+                }}
+                activeDot={{
+                  r: 6,
+                  fill: item.color || CHART_COLORS.teal,
+                  stroke: '#ffffff',
+                  strokeWidth: 2,
+                }}
               />
             ))}
           </LineChart>
