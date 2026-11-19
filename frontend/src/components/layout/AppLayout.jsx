@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import Sidebar from './Sidebar';
+import GradualBlur from '../motion/GradualBlur';
 
 export default function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,6 +54,19 @@ export default function AppLayout() {
         <main className="mx-auto w-full max-w-[1560px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <Outlet />
         </main>
+
+        <GradualBlur
+          target="page"
+          position="bottom"
+          height="3.5rem"
+          layers={6}
+          strength={1.4}
+          tint="rgba(250, 250, 249, 0.78)"
+          autoHide
+          zIndex={20}
+          className="left-0 lg:left-64"
+          style={{ left: undefined }}
+        />
       </div>
     </div>
   );

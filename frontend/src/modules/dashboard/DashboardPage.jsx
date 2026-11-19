@@ -20,6 +20,8 @@ import DataTable from '../../components/tables/DataTable';
 import BarChartCard from '../../components/charts/BarChartCard';
 import PieChartCard from '../../components/charts/PieChartCard';
 import { CHART_COLORS } from '../../components/charts/chartTheme';
+import { BentoCard, BentoGrid } from '../../components/motion/BentoGrid';
+import AnimatedContent from '../../components/motion/AnimatedContent';
 import dashboard from '../../services/dashboard';
 import useFetch from '../../hooks/useFetch';
 import { getApiMessage } from '../../utils/errors';
@@ -207,22 +209,42 @@ export default function DashboardPage() {
             onRetry={resumen.reload}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <BentoGrid
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+            glowColor="5, 150, 105"
+            spotlightRadius={260}
+            enableBorderGlow
+            enableSpotlight
+            clickEffect
+            intro
+          >
             {stats.map((stat) => (
-              <StatCard
+              <BentoCard
                 key={stat.label}
-                label={stat.label}
-                value={stat.value}
-                hint={stat.hint}
-                icon={stat.icon}
-                tone={stat.tone}
-              />
+                glowColor={stat.tone === 'negative' ? '225, 29, 72' : undefined}
+              >
+                <StatCard
+                  label={stat.label}
+                  value={stat.value}
+                  hint={stat.hint}
+                  icon={stat.icon}
+                  tone={stat.tone}
+                  className="h-full"
+                />
+              </BentoCard>
             ))}
-          </div>
+          </BentoGrid>
         )}
       </section>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <AnimatedContent
+        className="grid grid-cols-1 gap-4 xl:grid-cols-3"
+        distance={24}
+        blur={4}
+        duration={0.5}
+        stagger={0.08}
+        threshold={0.08}
+      >
         <BarChartCard
           className="xl:col-span-2"
           title="Producción por campaña"
@@ -251,42 +273,46 @@ export default function DashboardPage() {
           emptyTitle="Sin gastos registrados"
           emptyDescription="Cuando registre gastos, aquí verá en qué se invierte."
         />
-      </div>
+      </AnimatedContent>
 
-      <BarChartCard
-        title="Ventas vs. gastos por campaña"
-        description="Comparativo en soles de lo ingresado y lo invertido."
-        data={comparativo}
-        xKey="nombreCampana"
-        series={[
-          { dataKey: 'ventas', name: 'Ventas (S/)', fill: CHART_COLORS.emerald },
-          { dataKey: 'gastos', name: 'Gastos (S/)', fill: CHART_COLORS.amber },
-        ]}
-        legend={[
-          { name: 'Ventas (S/)', color: CHART_COLORS.emerald },
-          { name: 'Gastos (S/)', color: CHART_COLORS.amber },
-        ]}
-        valueFormatter={(value) => formatNumber(value)}
-        height={280}
-        loading={ventas.loading || gastos.loading}
-        error={ventas.error || gastos.error}
-        onRetry={() => {
-          ventas.reload();
-          gastos.reload();
-        }}
-        emptyTitle="Sin datos comparables"
-        emptyDescription="Registre ventas y gastos para compararlos por campaña."
-      />
+      <AnimatedContent distance={24} blur={4} duration={0.5} threshold={0.08}>
+        <BarChartCard
+          title="Ventas vs. gastos por campaña"
+          description="Comparativo en soles de lo ingresado y lo invertido."
+          data={comparativo}
+          xKey="nombreCampana"
+          series={[
+            { dataKey: 'ventas', name: 'Ventas (S/)', fill: CHART_COLORS.emerald },
+            { dataKey: 'gastos', name: 'Gastos (S/)', fill: CHART_COLORS.amber },
+          ]}
+          legend={[
+            { name: 'Ventas (S/)', color: CHART_COLORS.emerald },
+            { name: 'Gastos (S/)', color: CHART_COLORS.amber },
+          ]}
+          valueFormatter={(value) => formatNumber(value)}
+          height={280}
+          loading={ventas.loading || gastos.loading}
+          error={ventas.error || gastos.error}
+          onRetry={() => {
+            ventas.reload();
+            gastos.reload();
+          }}
+          emptyTitle="Sin datos comparables"
+          emptyDescription="Registre ventas y gastos para compararlos por campaña."
+        />
+      </AnimatedContent>
 
-      <DataTable
-        columns={rentabilidadColumns}
-        rows={rentabilidadRows}
-        loading={rentabilidad.loading}
-        error={rentabilidad.error}
-        onRetry={rentabilidad.reload}
-        emptyTitle="Sin rentabilidad por campaña"
-        emptyDescription="Cuando registre cosechas, ventas y gastos, aquí verá la rentabilidad de cada campaña."
-      />
+      <AnimatedContent distance={24} blur={4} duration={0.5} threshold={0.08}>
+        <DataTable
+          columns={rentabilidadColumns}
+          rows={rentabilidadRows}
+          loading={rentabilidad.loading}
+          error={rentabilidad.error}
+          onRetry={rentabilidad.reload}
+          emptyTitle="Sin rentabilidad por campaña"
+          emptyDescription="Cuando registre cosechas, ventas y gastos, aquí verá la rentabilidad de cada campaña."
+        />
+      </AnimatedContent>
     </div>
   );
 }
