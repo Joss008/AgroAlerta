@@ -13,6 +13,7 @@ public final class AgricultorMapper {
                 agricultor.getId(),
                 agricultor.getNombres(),
                 agricultor.getApellidos(),
-                agricultor.getTelefono());
+                agricultor.getTelefono(),
+                agricultor.getDni());
     }
 }

@@ -27,4 +27,7 @@ public class Agricultor {
 
     @JsonProperty("telefono")
     private String telefono;
+
+    @JsonProperty("dni")
+    private String dni;
 }

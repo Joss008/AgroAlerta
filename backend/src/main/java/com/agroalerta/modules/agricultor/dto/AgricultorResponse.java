@@ -4,5 +4,6 @@ public record AgricultorResponse(
         Long id,
         String nombres,
         String apellidos,
-        String telefono) {
+        String telefono,
+        String dni) {
 }

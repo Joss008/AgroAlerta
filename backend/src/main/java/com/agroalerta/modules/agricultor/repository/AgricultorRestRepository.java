@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public class AgricultorRestRepository {
 
     private static final String PATH = "/agricultor";
-    private static final String COLUMNS = "id_agricultor,nombres,apellidos,telefono";
+    private static final String COLUMNS = "id_agricultor,nombres,apellidos,telefono,dni";
 
     private final SupabaseRestClient client;
 
@@ -31,7 +31,7 @@ public class AgricultorRestRepository {
                 .range(page * size, page * size + size - 1);
         if (q != null && !q.isBlank()) {
             String safe = q.trim().replace("%", "").replace("*", "");
-            query.or("nombres.ilike.*" + safe + "*,apellidos.ilike.*" + safe + "*");
+            query.or("nombres.ilike.*" + safe + "*,apellidos.ilike.*" + safe + "*,dni.ilike.*" + safe + "*");
         }
         SupabasePage<Agricultor> result = client.getPage(PATH, query.build(), Agricultor.class);
         return PageResponse.of(result.content(), page, size, result.totalElements());
@@ -65,6 +65,7 @@ public class AgricultorRestRepository {
         body.put("nombres", request.nombres().trim());
         body.put("apellidos", request.apellidos().trim());
         body.put("telefono", blankToNull(request.telefono()));
+        body.put("dni", blankToNull(request.dni()));
         return body;
     }
 

@@ -1,10 +1,15 @@
 import CrudPage from '../../components/common/CrudPage';
 import agricultores from '../../services/agricultores';
 import { DASH } from '../../utils/format';
-import { agricultoresFields } from './AgricultoresForm';
+import { agricultoresFields, validateAgricultores } from './AgricultoresForm';
 
 const columns = [
   { key: 'id', header: 'Código', align: 'right', className: 'text-stone-500', render: (row) => `#${row.id}` },
+  {
+    key: 'dni',
+    header: 'DNI',
+    render: (row) => row.dni || DASH,
+  },
   { key: 'nombres', header: 'Nombres' },
   { key: 'apellidos', header: 'Apellidos' },
   {
@@ -25,8 +30,9 @@ export default function AgricultoresPage() {
       entityLabel="agricultor"
       entityLabelPlural="agricultores"
       newLabel="Nuevo"
-      searchPlaceholder="Buscar por nombre o apellido…"
-      defaultValues={{ nombres: '', apellidos: '', telefono: '' }}
+      searchPlaceholder="Buscar por nombre, apellido o DNI…"
+      defaultValues={{ dni: '', nombres: '', apellidos: '', telefono: '' }}
+      validate={validateAgricultores}
     />
   );
 }

@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
 import {
   CalendarRange,
+  Compass,
   Droplets,
+  Layers,
   Map as MapIcon,
+  Maximize2,
   RefreshCw,
   ShoppingBag,
   Sprout,
@@ -111,6 +114,8 @@ const rentabilidadColumns = [
   },
 ];
 
+const AREA_TOTAL_PROMEDIO_HA = 20000;
+
 export default function DashboardPage() {
   const resumen = useFetch(dashboard.resumen);
   const produccion = useFetch(dashboard.produccion);
@@ -128,6 +133,13 @@ export default function DashboardPage() {
 
   const stats = useMemo(() => {
     const data = resumen.data || {};
+    const areaUtilizada =
+      data.areaTotalHectareas == null ? null : Number(data.areaTotalHectareas);
+    const areaDisponible =
+      areaUtilizada == null || Number.isNaN(areaUtilizada)
+        ? null
+        : Math.max(0, AREA_TOTAL_PROMEDIO_HA - areaUtilizada);
+
     const rentabilidadSoles = data.rentabilidadTotalSoles;
     const rentabilidadTone =
       rentabilidadSoles == null
@@ -148,7 +160,23 @@ export default function DashboardPage() {
         icon: CalendarRange,
         hint: `${formatInteger(data.campanasActivas)} activas`,
       },
-      { label: 'Área total', value: formatHectares(data.areaTotalHectareas) },
+      {
+        label: 'Área total promedio',
+        value: formatHectares(AREA_TOTAL_PROMEDIO_HA),
+        icon: Maximize2,
+        hint: 'Referencia fija',
+      },
+      {
+        label: 'Área utilizada',
+        value: formatHectares(areaUtilizada),
+        icon: Layers,
+      },
+      {
+        label: 'Hectáreas disponibles',
+        value: formatHectares(areaDisponible),
+        icon: Compass,
+        tone: areaDisponible != null && areaDisponible > 0 ? 'positive' : 'default',
+      },
       {
         label: 'Producción total',
         value: formatKg(data.produccionTotalKg),

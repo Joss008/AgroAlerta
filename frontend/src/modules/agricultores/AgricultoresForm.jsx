@@ -1,5 +1,14 @@
 export const agricultoresFields = [
   {
+    name: 'dni',
+    label: 'DNI',
+    type: 'text',
+    required: true,
+    maxLength: 8,
+    placeholder: 'Ej. 71234567',
+    hint: '8 dígitos numéricos.',
+  },
+  {
     name: 'nombres',
     label: 'Nombres',
     type: 'text',
@@ -24,3 +33,12 @@ export const agricultoresFields = [
     hint: 'Opcional.',
   },
 ];
+
+export function validateAgricultores(values) {
+  const errors = {};
+  const dni = String(values.dni ?? '').trim();
+  if (dni && !/^\d{8}$/.test(dni)) {
+    errors.dni = 'El DNI debe tener exactamente 8 dígitos numéricos.';
+  }
+  return errors;
+}

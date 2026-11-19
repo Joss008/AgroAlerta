@@ -15,5 +15,9 @@ public record AgricultorRequest(
 
         @Pattern(regexp = "^$|^\\+?[0-9\\s-]{5,20}$",
                 message = "El teléfono debe tener entre 5 y 20 dígitos (se permiten +, espacios y guiones)")
-        String telefono) {
+        String telefono,
+
+        @Pattern(regexp = "^$|^[0-9]{8}$",
+                message = "El DNI debe tener exactamente 8 dígitos")
+        String dni) {
 }
