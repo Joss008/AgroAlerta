@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import CrudPage from '../../components/common/CrudPage';
 import Badge from '../../components/common/Badge';
+import StatusMark from '../../components/motion/StatusMark';
 import campanas from '../../services/campanas';
 import parcelas from '../../services/parcelas';
 import cultivos from '../../services/cultivos';
@@ -36,9 +37,30 @@ const columns = [
     header: 'Estado',
     render: (row) =>
       row.fechaFin ? (
-        <Badge variant="default">Finalizada</Badge>
+        <Badge variant="default">
+          <StatusMark
+            status="done"
+            label="Finalizada"
+            size={14}
+            fontSize={12}
+            strokeWidth={2.2}
+            strike={false}
+            color="#57534e"
+            doneColor="#57534e"
+          />
+        </Badge>
       ) : (
-        <Badge variant="success">En curso</Badge>
+        <Badge variant="success">
+          <StatusMark
+            status="running"
+            label="En curso"
+            size={14}
+            fontSize={12}
+            strokeWidth={2.2}
+            strike={false}
+            color="#047857"
+          />
+        </Badge>
       ),
   },
 ];
