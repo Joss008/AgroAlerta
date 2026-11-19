@@ -20,15 +20,18 @@ import ErrorAlert from '../../components/common/ErrorAlert';
 import Loading from '../../components/common/Loading';
 import Badge from '../../components/common/Badge';
 import DataTable from '../../components/tables/DataTable';
+import AreaChartCard from '../../components/charts/AreaChartCard';
 import BarChartCard from '../../components/charts/BarChartCard';
 import PieChartCard from '../../components/charts/PieChartCard';
 import { CHART_COLORS } from '../../components/charts/chartTheme';
 import { BentoCard, BentoGrid } from '../../components/motion/BentoGrid';
 import AnimatedContent from '../../components/motion/AnimatedContent';
+import cosechas from '../../services/cosechas';
 import dashboard from '../../services/dashboard';
 import useFetch from '../../hooks/useFetch';
 import { getApiMessage } from '../../utils/errors';
 import {
+  formatDate,
   formatHectares,
   formatInteger,
   formatKg,
@@ -114,6 +117,19 @@ const rentabilidadColumns = [
   },
 ];
 
+function buildHistoricoProduccion(rows) {
+  const byDate = new Map();
+  for (const row of rows) {
+    if (!row?.fechaCosecha) continue;
+    const key = String(row.fechaCosecha).slice(0, 10);
+    const kg = Number(row.cantidadKg) || 0;
+    byDate.set(key, (byDate.get(key) || 0) + kg);
+  }
+  return Array.from(byDate.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([fecha, cantidadKg]) => ({ fecha, cantidadKg }));
+}
+
 const AREA_TOTAL_PROMEDIO_HA = 20000;
 
 export default function DashboardPage() {
@@ -122,6 +138,7 @@ export default function DashboardPage() {
   const ventas = useFetch(dashboard.ventas);
   const gastos = useFetch(dashboard.gastos);
   const rentabilidad = useFetch(dashboard.rentabilidad);
+  const cosechasHist = useFetch(() => cosechas.list({ page: 0, size: 100 }));
 
   const refreshAll = () => {
     resumen.reload();
@@ -129,6 +146,7 @@ export default function DashboardPage() {
     ventas.reload();
     gastos.reload();
     rentabilidad.reload();
+    cosechasHist.reload();
   };
 
   const stats = useMemo(() => {
@@ -207,6 +225,12 @@ export default function DashboardPage() {
     ? gastos.data.porConcepto
     : [];
   const rentabilidadRows = Array.isArray(rentabilidad.data) ? rentabilidad.data : [];
+  const historicoProduccion = useMemo(() => {
+    const rows = Array.isArray(cosechasHist.data?.content)
+      ? cosechasHist.data.content
+      : [];
+    return buildHistoricoProduccion(rows);
+  }, [cosechasHist.data]);
 
   return (
     <div className="space-y-4">
@@ -327,6 +351,55 @@ export default function DashboardPage() {
           }}
           emptyTitle="Sin datos comparables"
           emptyDescription="Registre ventas y gastos para compararlos por campaña."
+        />
+      </AnimatedContent>
+
+      <AnimatedContent
+        className="grid grid-cols-1 gap-4 xl:grid-cols-2"
+        distance={24}
+        blur={4}
+        duration={0.5}
+        stagger={0.08}
+        threshold={0.08}
+      >
+        <BarChartCard
+          title="Rendimiento estadístico por campaña"
+          description="Productividad promedio expresada en kilogramos por hectárea."
+          data={produccionRows}
+          xKey="nombreCampana"
+          series={[
+            {
+              dataKey: 'rendimientoKgHa',
+              name: 'Rendimiento (kg/ha)',
+              fill: CHART_COLORS.teal,
+            },
+          ]}
+          legend={[{ name: 'Rendimiento (kg/ha)', color: CHART_COLORS.teal }]}
+          valueFormatter={(value) => formatNumber(value, { max: 1 })}
+          height={280}
+          loading={produccion.loading}
+          error={produccion.error}
+          onRetry={produccion.reload}
+          emptyTitle="Sin rendimiento registrado"
+          emptyDescription="Registre cosechas en sus parcelas para calcular el rendimiento por hectárea."
+        />
+        <AreaChartCard
+          title="Histórico de producción en el tiempo"
+          description="Evolución cronológica de los kilogramos cosechados según fecha de cosecha."
+          data={historicoProduccion}
+          xKey="fecha"
+          dataKey="cantidadKg"
+          seriesName="Cosecha (kg)"
+          color={CHART_COLORS.sky}
+          legend={[{ name: 'Cosecha (kg)', color: CHART_COLORS.sky }]}
+          valueFormatter={(value) => formatNumber(value)}
+          xTickFormatter={formatDate}
+          height={280}
+          loading={cosechasHist.loading}
+          error={cosechasHist.error}
+          onRetry={cosechasHist.reload}
+          emptyTitle="Sin historial de cosechas"
+          emptyDescription="Registre cosechas con fecha para visualizar la tendencia histórica."
         />
       </AnimatedContent>
 
