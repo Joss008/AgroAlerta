@@ -19,5 +19,8 @@ public record AgricultorRequest(
 
         @Pattern(regexp = "^$|^[0-9]{8}$",
                 message = "El DNI debe tener exactamente 8 dígitos")
-        String dni) {
+        String dni,
+
+        @Size(max = 200000, message = "La imagen supera el tamaño máximo permitido")
+        String fotoUrl) {
 }

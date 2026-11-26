@@ -1,4 +1,5 @@
 import CrudPage from '../../components/common/CrudPage';
+import Thumbnail from '../../components/common/Thumbnail';
 import agricultores from '../../services/agricultores';
 import { DASH } from '../../utils/format';
 import { agricultoresFields, validateAgricultores } from './AgricultoresForm';
@@ -6,12 +7,26 @@ import { agricultoresFields, validateAgricultores } from './AgricultoresForm';
 const columns = [
   { key: 'id', header: 'Código', align: 'right', className: 'text-stone-500', render: (row) => `#${row.id}` },
   {
+    key: 'fotoUrl',
+    header: 'Agricultor',
+    render: (row) => (
+      <div className="flex items-center gap-2.5">
+        <Thumbnail
+          src={row.fotoUrl}
+          alt={`${row.nombres} ${row.apellidos}`.trim()}
+          size="sm"
+        />
+        <span className="font-medium text-stone-800">
+          {`${row.nombres} ${row.apellidos}`.trim()}
+        </span>
+      </div>
+    ),
+  },
+  {
     key: 'dni',
     header: 'DNI',
     render: (row) => row.dni || DASH,
   },
-  { key: 'nombres', header: 'Nombres' },
-  { key: 'apellidos', header: 'Apellidos' },
   {
     key: 'telefono',
     header: 'Teléfono',
@@ -31,7 +46,7 @@ export default function AgricultoresPage() {
       entityLabelPlural="agricultores"
       newLabel="Nuevo"
       searchPlaceholder="Buscar por nombre, apellido o DNI…"
-      defaultValues={{ dni: '', nombres: '', apellidos: '', telefono: '' }}
+      defaultValues={{ fotoUrl: '', dni: '', nombres: '', apellidos: '', telefono: '' }}
       validate={validateAgricultores}
     />
   );

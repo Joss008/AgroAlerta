@@ -84,15 +84,20 @@ public class ParcelaRestRepository {
             return;
         }
         Map<String, String> params = SupabaseQuery.of()
-                .select("id_agricultor,nombres,apellidos")
+                .select("id_agricultor,nombres,apellidos,foto_url")
                 .in("id_agricultor", ids.stream().map(String::valueOf).collect(Collectors.joining(",")))
                 .build();
         AgricultorRef[] refs = client.getArray("/agricultor", params, AgricultorRef.class);
         Map<Long, String> nombres = new HashMap<>();
+        Map<Long, String> fotos = new HashMap<>();
         for (AgricultorRef ref : refs) {
             nombres.put(ref.id, (ref.nombres + " " + ref.apellidos).trim());
+            fotos.put(ref.id, ref.fotoUrl);
         }
-        rows.forEach(r -> r.setNombreAgricultor(nombres.get(r.getIdAgricultor())));
+        rows.forEach(r -> {
+            r.setNombreAgricultor(nombres.get(r.getIdAgricultor()));
+            r.setFotoAgricultor(fotos.get(r.getIdAgricultor()));
+        });
     }
 
     private Map<String, Object> toBody(ParcelaRequest request) {
@@ -118,5 +123,7 @@ public class ParcelaRestRepository {
         private String nombres;
         @JsonProperty("apellidos")
         private String apellidos;
+        @JsonProperty("foto_url")
+        private String fotoUrl;
     }
 }

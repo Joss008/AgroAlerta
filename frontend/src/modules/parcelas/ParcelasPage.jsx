@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import CrudPage from '../../components/common/CrudPage';
+import Thumbnail from '../../components/common/Thumbnail';
 import parcelas from '../../services/parcelas';
 import agricultores from '../../services/agricultores';
 import useSelectOptions from '../../hooks/useSelectOptions';
@@ -12,7 +13,19 @@ const columns = [
   {
     key: 'nombreAgricultor',
     header: 'Agricultor',
-    render: (row) => row.nombreAgricultor || DASH,
+    render: (row) =>
+      row.nombreAgricultor ? (
+        <div className="flex items-center gap-2">
+          <Thumbnail
+            src={row.fotoAgricultor}
+            alt={row.nombreAgricultor}
+            size="xs"
+          />
+          <span>{row.nombreAgricultor}</span>
+        </div>
+      ) : (
+        DASH
+      ),
   },
   {
     key: 'areaHectareas',
@@ -31,6 +44,8 @@ export default function ParcelasPage() {
   const agricultoresOptions = useSelectOptions(agricultores.list, (row) => ({
     value: row.id,
     label: `${row.nombres} ${row.apellidos}`,
+    image: row.fotoUrl || '',
+    subtitle: row.dni ? `DNI: ${row.dni}` : undefined,
   }));
 
   const fields = useMemo(

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public class AgricultorRestRepository {
 
     private static final String PATH = "/agricultor";
-    private static final String COLUMNS = "id_agricultor,nombres,apellidos,telefono,dni";
+    private static final String COLUMNS = "id_agricultor,nombres,apellidos,telefono,dni,foto_url";
 
     private final SupabaseRestClient client;
 
@@ -66,6 +66,7 @@ public class AgricultorRestRepository {
         body.put("apellidos", request.apellidos().trim());
         body.put("telefono", blankToNull(request.telefono()));
         body.put("dni", blankToNull(request.dni()));
+        body.put("foto_url", blankToNull(request.fotoUrl()));
         return body;
     }
 

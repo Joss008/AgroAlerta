@@ -5,5 +5,6 @@ public record AgricultorResponse(
         String nombres,
         String apellidos,
         String telefono,
-        String dni) {
+        String dni,
+        String fotoUrl) {
 }

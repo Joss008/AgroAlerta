@@ -30,4 +30,7 @@ public class Agricultor {
 
     @JsonProperty("dni")
     private String dni;
+
+    @JsonProperty("foto_url")
+    private String fotoUrl;
 }

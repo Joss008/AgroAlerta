@@ -33,4 +33,6 @@ public class Parcela {
     private String ubicacion;
 
     private String nombreAgricultor; // transitorio: no es columna
+
+    private String fotoAgricultor; // transitorio: no es columna
 }

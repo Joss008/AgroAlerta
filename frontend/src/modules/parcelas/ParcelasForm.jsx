@@ -5,6 +5,7 @@ export default function getParcelasFields({ agricultores } = {}) {
       label: 'Agricultor',
       type: 'select',
       required: true,
+      showPreview: true,
       placeholder: 'Seleccione un agricultor',
       options: agricultores?.options || [],
       optionsLoading: Boolean(agricultores?.loading),

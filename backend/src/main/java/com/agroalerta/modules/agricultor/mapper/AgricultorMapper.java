@@ -14,6 +14,7 @@ public final class AgricultorMapper {
                 agricultor.getNombres(),
                 agricultor.getApellidos(),
                 agricultor.getTelefono(),
-                agricultor.getDni());
+                agricultor.getDni(),
+                agricultor.getFotoUrl());
     }
 }

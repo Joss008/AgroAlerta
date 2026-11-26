@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS agricultor (
     nombres       VARCHAR(100) NOT NULL,
     apellidos     VARCHAR(100) NOT NULL,
     telefono      VARCHAR(20),
-    dni           VARCHAR(8)
+    dni           VARCHAR(8),
+    foto_url      TEXT
 );
 
 CREATE TABLE IF NOT EXISTS parcela (

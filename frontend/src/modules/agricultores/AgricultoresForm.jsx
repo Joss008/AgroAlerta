@@ -1,5 +1,11 @@
 export const agricultoresFields = [
   {
+    name: 'fotoUrl',
+    label: 'Foto del agricultor',
+    type: 'image',
+    hint: 'Opcional. Se mostrará en miniatura al asignar parcelas.',
+  },
+  {
     name: 'dni',
     label: 'DNI',
     type: 'text',

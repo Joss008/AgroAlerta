@@ -8,5 +8,6 @@ public record ParcelaResponse(
         String nombre,
         BigDecimal areaHectareas,
         String ubicacion,
-        String nombreAgricultor) {
+        String nombreAgricultor,
+        String fotoAgricultor) {
 }

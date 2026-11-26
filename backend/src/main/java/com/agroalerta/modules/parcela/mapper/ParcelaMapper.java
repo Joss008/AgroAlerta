@@ -15,6 +15,7 @@ public final class ParcelaMapper {
                 parcela.getNombre(),
                 parcela.getAreaHectareas(),
                 parcela.getUbicacion(),
-                parcela.getNombreAgricultor());
+                parcela.getNombreAgricultor(),
+                parcela.getFotoAgricultor());
     }
 }

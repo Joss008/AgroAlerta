@@ -1,4 +1,6 @@
 import FormField from './FormField';
+import ImageInput from './ImageInput';
+import Thumbnail from '../common/Thumbnail';
 import { Input, Select, Textarea } from './inputs';
 
 function FieldControl({ field, value, invalid, disabled, onChange }) {
@@ -21,34 +23,69 @@ function FieldControl({ field, value, invalid, disabled, onChange }) {
     );
   }
 
+  if (field.type === 'image') {
+    return (
+      <ImageInput
+        {...common}
+        value={value ?? ''}
+        placeholder={field.placeholder}
+        onChange={(nextValue) => onChange(field.name, nextValue)}
+      />
+    );
+  }
+
   if (field.type === 'select') {
     const options = field.options || [];
+    const selectedOption = options.find(
+      (option) => String(option.value) === String(value ?? ''),
+    );
     return (
-      <Select
-        {...common}
-        value={value == null ? '' : String(value)}
-        onChange={(event) => {
-          const raw = event.target.value;
-          if (raw === '') {
-            onChange(field.name, '');
-          } else if (field.numeric === false) {
-            onChange(field.name, raw);
-          } else {
-            onChange(field.name, Number(raw));
-          }
-        }}
-      >
-        <option value="">
-          {field.optionsLoading
-            ? 'Cargando opciones…'
-            : (field.placeholder || 'Seleccione una opción')}
-        </option>
-        {options.map((option) => (
-          <option key={String(option.value)} value={String(option.value)}>
-            {option.label}
+      <div className="space-y-2">
+        <Select
+          {...common}
+          value={value == null ? '' : String(value)}
+          onChange={(event) => {
+            const raw = event.target.value;
+            if (raw === '') {
+              onChange(field.name, '');
+            } else if (field.numeric === false) {
+              onChange(field.name, raw);
+            } else {
+              onChange(field.name, Number(raw));
+            }
+          }}
+        >
+          <option value="">
+            {field.optionsLoading
+              ? 'Cargando opciones…'
+              : (field.placeholder || 'Seleccione una opción')}
           </option>
-        ))}
-      </Select>
+          {options.map((option) => (
+            <option key={String(option.value)} value={String(option.value)}>
+              {option.label}
+            </option>
+          ))}
+        </Select>
+        {field.showPreview && selectedOption ? (
+          <div className="flex items-center gap-2.5 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2">
+            <Thumbnail
+              src={selectedOption.image}
+              alt={selectedOption.label}
+              size="md"
+            />
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold text-stone-800">
+                {selectedOption.label}
+              </p>
+              {selectedOption.subtitle ? (
+                <p className="truncate text-[11px] text-stone-500">
+                  {selectedOption.subtitle}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+      </div>
     );
   }
 
@@ -96,7 +133,8 @@ export default function EntityForm({ fields, values, errors = {}, onChange, disa
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {fields.map((field) => {
         const invalid = Boolean(errors[field.name]);
-        const full = field.full || field.type === 'textarea';
+        const full =
+          field.full || field.type === 'textarea' || field.type === 'image';
         return (
           <div key={field.name} className={full ? 'sm:col-span-2' : ''}>
             <FormField
