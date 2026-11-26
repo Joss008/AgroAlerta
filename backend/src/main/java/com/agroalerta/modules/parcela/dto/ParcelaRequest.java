@@ -19,5 +19,8 @@ public record ParcelaRequest(
         BigDecimal areaHectareas,
 
         @Size(max = 200, message = "La ubicación no puede superar 200 caracteres")
-        String ubicacion) {
+        String ubicacion,
+
+        @Size(max = 200000, message = "La imagen supera el tamaño máximo permitido")
+        String fotoUrl) {
 }

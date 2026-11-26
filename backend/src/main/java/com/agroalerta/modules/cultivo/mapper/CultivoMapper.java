@@ -9,6 +9,10 @@ public final class CultivoMapper {
     }
 
     public static CultivoResponse toResponse(Cultivo cultivo) {
-        return new CultivoResponse(cultivo.getId(), cultivo.getNombre(), cultivo.getVariedad());
+        return new CultivoResponse(
+                cultivo.getId(),
+                cultivo.getNombre(),
+                cultivo.getVariedad(),
+                cultivo.getFotoUrl());
     }
 }

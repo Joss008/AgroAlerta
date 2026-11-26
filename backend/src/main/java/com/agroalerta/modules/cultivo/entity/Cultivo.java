@@ -24,4 +24,7 @@ public class Cultivo {
 
     @JsonProperty("variedad")
     private String variedad;
+
+    @JsonProperty("foto_url")
+    private String fotoUrl;
 }

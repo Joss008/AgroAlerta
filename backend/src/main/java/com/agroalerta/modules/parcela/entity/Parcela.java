@@ -32,6 +32,9 @@ public class Parcela {
     @JsonProperty("ubicacion")
     private String ubicacion;
 
+    @JsonProperty("foto_url")
+    private String fotoUrl;
+
     private String nombreAgricultor; // transitorio: no es columna
 
     private String fotoAgricultor; // transitorio: no es columna

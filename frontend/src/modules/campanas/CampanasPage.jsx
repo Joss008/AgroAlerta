@@ -69,11 +69,15 @@ export default function CampanasPage() {
   const parcelasOptions = useSelectOptions(parcelas.list, (row) => ({
     value: row.id,
     label: row.nombreAgricultor ? `${row.nombre} · ${row.nombreAgricultor}` : row.nombre,
+    image: row.fotoUrl || '',
+    subtitle: row.areaHectareas != null ? `${row.areaHectareas} ha` : undefined,
   }));
 
   const cultivosOptions = useSelectOptions(cultivos.list, (row) => ({
     value: row.id,
     label: row.variedad ? `${row.nombre} · ${row.variedad}` : row.nombre,
+    image: row.fotoUrl || '',
+    subtitle: row.variedad ? `Variedad: ${row.variedad}` : undefined,
   }));
 
   const fields = useMemo(

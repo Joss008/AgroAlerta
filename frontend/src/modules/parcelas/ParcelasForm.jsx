@@ -1,6 +1,12 @@
 export default function getParcelasFields({ agricultores } = {}) {
   return [
     {
+      name: 'fotoUrl',
+      label: 'Foto de la parcela',
+      type: 'image',
+      hint: 'Opcional. Se mostrará en el catálogo de parcelas y al crear campañas.',
+    },
+    {
       name: 'idAgricultor',
       label: 'Agricultor',
       type: 'select',

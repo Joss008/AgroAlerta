@@ -9,7 +9,16 @@ import getParcelasFields from './ParcelasForm';
 
 const columns = [
   { key: 'id', header: 'Código', align: 'right', className: 'text-stone-500', render: (row) => `#${row.id}` },
-  { key: 'nombre', header: 'Parcela' },
+  {
+    key: 'nombre',
+    header: 'Parcela',
+    render: (row) => (
+      <div className="flex items-center gap-2.5">
+        <Thumbnail src={row.fotoUrl} alt={row.nombre} size="sm" rounded="lg" />
+        <span className="font-medium text-stone-800">{row.nombre}</span>
+      </div>
+    ),
+  },
   {
     key: 'nombreAgricultor',
     header: 'Agricultor',
@@ -64,7 +73,7 @@ export default function ParcelasPage() {
       entityLabelPlural="parcelas"
       newLabel="Nueva"
       searchPlaceholder="Buscar por nombre o ubicación…"
-      defaultValues={{ idAgricultor: '', nombre: '', areaHectareas: '', ubicacion: '' }}
+      defaultValues={{ fotoUrl: '', idAgricultor: '', nombre: '', areaHectareas: '', ubicacion: '' }}
       filters={[
         {
           name: 'idAgricultor',

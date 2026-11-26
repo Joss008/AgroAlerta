@@ -23,7 +23,7 @@ import org.springframework.stereotype.Repository;
 public class ParcelaRestRepository {
 
     private static final String PATH = "/parcela";
-    private static final String COLUMNS = "id_parcela,id_agricultor,nombre,area_hectareas,ubicacion";
+    private static final String COLUMNS = "id_parcela,id_agricultor,nombre,area_hectareas,ubicacion,foto_url";
 
     private final SupabaseRestClient client;
 
@@ -106,6 +106,7 @@ public class ParcelaRestRepository {
         body.put("nombre", request.nombre().trim());
         body.put("area_hectareas", request.areaHectareas());
         body.put("ubicacion", blankToNull(request.ubicacion()));
+        body.put("foto_url", blankToNull(request.fotoUrl()));
         return body;
     }
 

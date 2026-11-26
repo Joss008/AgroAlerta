@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public class CultivoRestRepository {
 
     private static final String PATH = "/cultivo";
-    private static final String COLUMNS = "id_cultivo,nombre,variedad";
+    private static final String COLUMNS = "id_cultivo,nombre,variedad,foto_url";
 
     private final SupabaseRestClient client;
 
@@ -64,6 +64,7 @@ public class CultivoRestRepository {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("nombre", request.nombre().trim());
         body.put("variedad", blankToNull(request.variedad()));
+        body.put("foto_url", blankToNull(request.fotoUrl()));
         return body;
     }
 

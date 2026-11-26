@@ -9,5 +9,8 @@ public record CultivoRequest(
         String nombre,
 
         @Size(max = 100, message = "La variedad no puede superar 100 caracteres")
-        String variedad) {
+        String variedad,
+
+        @Size(max = 200000, message = "La imagen supera el tamaño máximo permitido")
+        String fotoUrl) {
 }
