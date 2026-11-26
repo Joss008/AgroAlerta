@@ -150,7 +150,7 @@ export default function DashboardPage() {
     cosechasHist.reload();
   };
 
-  const stats = useMemo(() => {
+  const summary = useMemo(() => {
     const data = resumen.data || {};
     const areaUtilizada =
       data.areaTotalHectareas == null ? null : Number(data.areaTotalHectareas);
@@ -158,59 +158,50 @@ export default function DashboardPage() {
       areaUtilizada == null || Number.isNaN(areaUtilizada)
         ? null
         : Math.max(0, AREA_TOTAL_PROMEDIO_HA - areaUtilizada);
+    const ocupacionPct =
+      areaUtilizada == null || Number.isNaN(areaUtilizada)
+        ? 0
+        : Math.min(100, Math.max(0, (areaUtilizada / AREA_TOTAL_PROMEDIO_HA) * 100));
 
     const rentabilidadSoles = data.rentabilidadTotalSoles;
+    const rentabilidadNum =
+      rentabilidadSoles == null ? null : Number(rentabilidadSoles);
     const rentabilidadTone =
-      rentabilidadSoles == null
+      rentabilidadNum == null
         ? 'default'
-        : Number(rentabilidadSoles) > 0
+        : rentabilidadNum > 0
           ? 'positive'
-          : Number(rentabilidadSoles) < 0
+          : rentabilidadNum < 0
             ? 'negative'
             : 'default';
 
-    return [
-      { label: 'Agricultores', value: formatInteger(data.agricultores), icon: Users },
-      { label: 'Parcelas', value: formatInteger(data.parcelas), icon: MapIcon },
-      { label: 'Cultivos', value: formatInteger(data.cultivos), icon: Sprout },
-      {
-        label: 'Campañas',
-        value: formatInteger(data.campanas),
-        icon: CalendarRange,
-        hint: `${formatInteger(data.campanasActivas)} activas`,
-      },
-      {
-        label: 'Área total promedio',
-        value: formatHectares(AREA_TOTAL_PROMEDIO_HA),
-        icon: Maximize2,
-        hint: 'Referencia fija',
-      },
-      {
-        label: 'Área utilizada',
-        value: formatHectares(areaUtilizada),
-        icon: Layers,
-      },
-      {
-        label: 'Hectáreas disponibles',
-        value: formatHectares(areaDisponible),
-        icon: Compass,
-        tone: areaDisponible != null && areaDisponible > 0 ? 'positive' : 'default',
-      },
-      {
-        label: 'Producción total',
-        value: formatKg(data.produccionTotalKg),
-        icon: Wheat,
-      },
-      { label: 'Ventas', value: formatSoles(data.ventasTotalSoles), icon: ShoppingBag },
-      { label: 'Gastos', value: formatSoles(data.gastosTotalSoles), icon: Wallet },
-      {
-        label: 'Rentabilidad',
-        value: formatSoles(rentabilidadSoles),
-        icon: TrendingUp,
-        tone: rentabilidadTone,
-      },
-      { label: 'Agua consumida', value: formatM3(data.aguaTotalM3), icon: Droplets },
-    ];
+    return {
+      rentabilidad: formatSoles(rentabilidadSoles),
+      rentabilidadTone,
+      ventas: formatSoles(data.ventasTotalSoles),
+      gastos: formatSoles(data.gastosTotalSoles),
+      areaPromedio: formatHectares(AREA_TOTAL_PROMEDIO_HA),
+      areaUtilizada: formatHectares(areaUtilizada),
+      areaDisponible: formatHectares(areaDisponible),
+      ocupacionPct,
+      counters: [
+        { label: 'Agricultores', value: formatInteger(data.agricultores), icon: Users },
+        { label: 'Parcelas', value: formatInteger(data.parcelas), icon: MapIcon },
+        { label: 'Cultivos', value: formatInteger(data.cultivos), icon: Sprout },
+        {
+          label: 'Campañas',
+          value: formatInteger(data.campanas),
+          icon: CalendarRange,
+          hint: `${formatInteger(data.campanasActivas)} activas`,
+        },
+        {
+          label: 'Producción total',
+          value: formatKg(data.produccionTotalKg),
+          icon: Wheat,
+        },
+        { label: 'Agua consumida', value: formatM3(data.aguaTotalM3), icon: Droplets },
+      ],
+    };
   }, [resumen.data]);
 
   const comparativo = useMemo(() => {
@@ -262,31 +253,169 @@ export default function DashboardPage() {
             onRetry={resumen.reload}
           />
         ) : (
-          <BentoGrid
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
-            glowColor="5, 150, 105"
-            spotlightRadius={260}
-            enableBorderGlow
-            enableSpotlight
-            clickEffect
-            intro
-          >
-            {stats.map((stat) => (
+          <div className="space-y-4">
+            <BentoGrid
+              className="grid grid-cols-1 gap-4 lg:grid-cols-12"
+              glowColor="5, 150, 105"
+              spotlightRadius={320}
+              enableBorderGlow
+              enableSpotlight
+              clickEffect
+              intro
+            >
               <BentoCard
-                key={stat.label}
-                glowColor={stat.tone === 'negative' ? '225, 29, 72' : undefined}
+                className="lg:col-span-5"
+                glowColor={
+                  summary.rentabilidadTone === 'negative'
+                    ? '251, 113, 133'
+                    : '52, 211, 153'
+                }
               >
-                <StatCard
-                  label={stat.label}
-                  value={stat.value}
-                  hint={stat.hint}
-                  icon={stat.icon}
-                  tone={stat.tone}
-                  className="h-full"
-                />
+                <div className="flex h-full flex-col justify-between gap-5 rounded-xl bg-emerald-950 p-5 text-white shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-emerald-200/80">
+                        Rentabilidad neta acumulada
+                      </p>
+                      <p
+                        className={`mt-2 text-3xl font-bold tracking-tight tabular-nums sm:text-4xl ${
+                          summary.rentabilidadTone === 'negative'
+                            ? 'text-rose-300'
+                            : 'text-white'
+                        }`}
+                      >
+                        {summary.rentabilidad}
+                      </p>
+                    </div>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/25">
+                      <TrendingUp size={18} aria-hidden="true" />
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 border-t border-emerald-900 pt-4">
+                    <div className="min-w-0">
+                      <p className="flex items-center gap-1.5 text-xs text-emerald-200/70">
+                        <ShoppingBag size={13} aria-hidden="true" />
+                        Ventas
+                      </p>
+                      <p className="mt-0.5 truncate text-base font-semibold text-emerald-100 tabular-nums">
+                        {summary.ventas}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="flex items-center gap-1.5 text-xs text-emerald-200/70">
+                        <Wallet size={13} aria-hidden="true" />
+                        Gastos
+                      </p>
+                      <p className="mt-0.5 truncate text-base font-semibold text-amber-200 tabular-nums">
+                        {summary.gastos}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </BentoCard>
-            ))}
-          </BentoGrid>
+
+              <BentoCard className="lg:col-span-7">
+                <div className="flex h-full flex-col justify-between gap-5 rounded-xl border border-stone-200/90 bg-white p-5 shadow-[0_1px_2px_rgba(24,24,27,0.04)]">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-stone-500">
+                        Ocupación de superficie agrícola
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <span className="text-3xl font-bold tracking-tight text-stone-900 tabular-nums">
+                          {summary.areaUtilizada}
+                        </span>
+                        <span className="text-sm text-stone-500">
+                          utilizadas de{' '}
+                          <span className="font-semibold text-stone-700">
+                            {summary.areaPromedio}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">
+                      <Layers size={18} aria-hidden="true" />
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div
+                      className="h-2.5 w-full overflow-hidden rounded-full bg-stone-100"
+                      role="progressbar"
+                      aria-valuenow={Math.round(summary.ocupacionPct * 100) / 100}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Porcentaje de área utilizada"
+                    >
+                      <div
+                        className="h-full rounded-full bg-emerald-600 transition-all duration-500"
+                        style={{
+                          width: `${
+                            summary.ocupacionPct > 0
+                              ? Math.max(summary.ocupacionPct, 1.5)
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3 border-t border-stone-100 pt-3">
+                      <div className="min-w-0">
+                        <p className="flex items-center gap-1 text-xs text-stone-500">
+                          <Maximize2 size={12} aria-hidden="true" />
+                          <span className="truncate">Total promedio</span>
+                        </p>
+                        <p className="mt-0.5 truncate text-sm font-semibold text-stone-800 tabular-nums">
+                          {summary.areaPromedio}
+                        </p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="flex items-center gap-1 text-xs text-stone-500">
+                          <Layers size={12} aria-hidden="true" />
+                          <span className="truncate">Área utilizada</span>
+                        </p>
+                        <p className="mt-0.5 truncate text-sm font-semibold text-stone-800 tabular-nums">
+                          {summary.areaUtilizada}
+                        </p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="flex items-center gap-1 text-xs text-stone-500">
+                          <Compass size={12} aria-hidden="true" />
+                          <span className="truncate">Disponibles</span>
+                        </p>
+                        <p className="mt-0.5 truncate text-sm font-semibold text-emerald-700 tabular-nums">
+                          {summary.areaDisponible}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </BentoCard>
+            </BentoGrid>
+
+            <BentoGrid
+              className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6"
+              glowColor="5, 150, 105"
+              spotlightRadius={220}
+              enableBorderGlow
+              enableSpotlight
+              clickEffect
+              intro
+            >
+              {summary.counters.map((stat) => (
+                <BentoCard key={stat.label}>
+                  <StatCard
+                    label={stat.label}
+                    value={stat.value}
+                    hint={stat.hint}
+                    icon={stat.icon}
+                    className="h-full"
+                  />
+                </BentoCard>
+              ))}
+            </BentoGrid>
+          </div>
         )}
       </section>
 

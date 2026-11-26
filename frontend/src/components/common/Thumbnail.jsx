@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 
 const SIZES = {
@@ -24,6 +24,11 @@ export default function Thumbnail({
   className = '',
 }) {
   const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   const sizeClass = SIZES[size] || SIZES.sm;
   const radiusClass = rounded === 'lg' ? 'rounded-lg' : 'rounded-full';
   const showImage = Boolean(src) && !failed;

@@ -67,11 +67,12 @@ function FieldControl({ field, value, invalid, disabled, onChange }) {
           ))}
         </Select>
         {field.showPreview && selectedOption ? (
-          <div className="flex items-center gap-2.5 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2">
+          <div className="flex items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2">
             <Thumbnail
               src={selectedOption.image}
               alt={selectedOption.label}
-              size="md"
+              size="lg"
+              rounded="lg"
             />
             <div className="min-w-0">
               <p className="truncate text-xs font-semibold text-stone-800">
@@ -81,6 +82,9 @@ function FieldControl({ field, value, invalid, disabled, onChange }) {
                 <p className="truncate text-[11px] text-stone-500">
                   {selectedOption.subtitle}
                 </p>
+              ) : null}
+              {!selectedOption.image ? (
+                <p className="text-[11px] text-stone-400">Sin foto registrada</p>
               ) : null}
             </div>
           </div>
