@@ -43,7 +43,7 @@ class AgricultorServiceImplTest {
     void creaAgricultorNormalizandoEspacios() {
         AgricultorServiceImpl service = new AgricultorServiceImpl(repository);
         AgricultorRequest request =
-                new AgricultorRequest("  Juan  ", "Pérez López", "999 888 777");
+                new AgricultorRequest("  Juan  ", "Pérez López", "999 888 777", "71234567", null);
         when(repository.insert(any(AgricultorRequest.class))).thenAnswer(inv -> {
             Agricultor agricultor = new Agricultor();
             agricultor.setId(1L);
